@@ -20,7 +20,7 @@ class ImagePreprocessor():
         return file_list
 
 
-    def resize_save(self, save=False):
+    def resize_save(self, save=False, color=False):
         '''
         The image transform pipeline. Will resize, grayscale, transform, save individual images, and pickle
         the image stream.
@@ -29,8 +29,9 @@ class ImagePreprocessor():
 
             src_path - a string with the absolute path of the raw images
             dest_path - a string with the absolute path of the processed images
-            save - to save or not to save each individual transformed image. Default = False
-            pickle - to pickle the whole image set. Default = False
+            save - to save or not to save each individual transformed image. default = False
+            color - saves a grayscale image if False, color image if True. 
+            default = False
 
         Output:
 
@@ -41,14 +42,19 @@ class ImagePreprocessor():
                 f_name = file.split('/')[-1].split('.')[0]
                 name = self.dest_dir + '/' + f_name + '.jpg'
                 resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
-                io.imsave(os.path.join(self.dest_dir, name), resized)
+                if color:
+                    colour = pd.Series(resized, name=file)
+                    io.imsave(os.path.join(self.dest_dir + '/color', name), colour)
+                if not color:
+                    gray = pd.Series(color.rgb2gray(resized), name=file)
+                    io.imsave(os.path.join(self.dest_dir + '/gray', name), gray)
 
         else: 
             image_set = np.ndarray()
 
             for file in glob.glob(self.src_dir + '/*'):
                 resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
-                gray = pd.series(color.rgb2gray(resized), name=file)
+                
                 image_set.append(np.asarray(gray))
 
             return image_set
@@ -81,7 +87,7 @@ if __name__ == '__main__':
 
     image_pre = ImagePreprocessor(src_dir, dest_dir)
     
-    image_set = image_pre.resize_save()
+    image_set = image_pre.resize_save(save=False, color=False)
 
     file_list = image_pre.get_file_list()
 

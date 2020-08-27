@@ -10,13 +10,19 @@ from eda import MakePlots
 
 
 if __name__ == '__main__':
+    '''
+    src_dir - the directory that contains the raw image files
+    dest_dir - the directory that you want to save the converted images in
+    ann_dir - the directory that contains the COCO-formatted annotations file
+    fname - the file name of the annotations file
+    '''
     src_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/raw/images'
     dest_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/processed/images'
-
-    image_pre = ImagePreprocessor(src_dir, dest_dir)
-
     ann_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/raw/annotations'
     fname = 'instances_default.json'
+
+    image_pre = ImagePreprocessor(src_dir, dest_dir)
+    image_pre.resize_save(save=False)
 
     lemons = DatasetBuilder(ann_dir, fname)
     X, y = lemons.load_data()

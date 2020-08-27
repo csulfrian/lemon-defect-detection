@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import glob
 from skimage import io, color
+from skimage.filters import sobel
+from skimage.feature import canny
 from pycocotools.coco import COCO
 
 
@@ -72,9 +74,12 @@ class DatasetBuilder():
         for file in glob.glob(path):
             fname = 'images/' + file.split('/')[-1]
             img = io.imread(file)
-            gray = color.rgb2gray(img).ravel()
+            gray = img.ravel()
 
-            image_dict['data'].append(gray)
+            # additional image filtering
+            # edges = sobel(img)
+
+            image_dict['data'].append(img.ravel())
             image_dict['filename'].append(fname)
 
         X_ = np.asarray(image_dict['data'])
