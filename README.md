@@ -5,7 +5,6 @@
 ### by Chris Sulfrian
 
 <img src="images/banner.jpg" style="width:900"/>
-*Image credit to the dataset creators*
 
 # The Problem
 Food waste is a big problem in the US, and using machine learning tools to minimize the chances of food getting wasted would be a very beneficial application of the technology. Consumers tend to be very fickle about the appearance of their produce, so the ideal situation would be to sort every piece with a high degree of scrutiny before it gets distributed to grocery stores food product manufacturers.
@@ -57,7 +56,7 @@ The class counts ended up being very unbalanced
 
 
 ### The Annotations File
-The .JSON formatted annotations file contains multiple entries (on average 12) per image with segmentation detailing the individual areas of interest on each fruit. This little snippet of code helps form the following annotated image.
+The .JSON formatted annotations file contains multiple entries (on average 12) per image with segmentation detailing the individual areas of interest on each fruit. This snippet of code helps form the following annotated image.
 
 ```json
 {'id': 6,  
