@@ -19,7 +19,7 @@ Each lemon weighs roughly 1/4 pound and represents a potential gross profit of $
 
 The goal then is to maximize the amount of lemons we can send to retail outlets as well as minimize the quantity of lemons being mis-categorized as inedible, both of which will maximize profit.
 
-<img src="images/profit_matrix.png" style="width: 600px"/>
+<img src="images/profit_matrix.png" style="width: 420px"/>
 
 # The Data
 
@@ -41,20 +41,19 @@ I found a dataset of 2690 images of lemons, along with annotations for each imag
 |    9 | pedicel            |
 
 
-I took the initial 9 categories and distilled them down to 3 categories to make decisions about which channel the lemon should be fed through:
+There are a couple of attributes that occur to varying degrees and could potentially be assigned to commercial or retail quality. I was  conservative with the selection criteria so only the best fruit gets sent to retail outlets. In real lemon distribution there are many categories that lemons fall into. I took the initial 9 categories and distilled them down to 3 categories to make decisions about which channel the lemon should be fed through:
 
-- Non-edible (Class 0):
-    + mould, gangrene
+- Non-edible (Class 0): mould, gangrene
 
-- Commercial (Class 1):
-    + blemish, dark_style_remains, illness
+- Commercial (Class 1): blemish, dark_style_remains, illness
 
-- Retail (Class 2):
-    + image_quality
+- Retail (Class 2): fruit with none of the above
+
+
 
 The class counts ended up being very unbalanced
 
-<img src="images/class_counts.png" style="width:600px;"/>
+<img src="images/class_counts.png" style="width:420px;"/>
 
 
 ### The Annotations File
