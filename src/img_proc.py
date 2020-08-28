@@ -3,8 +3,8 @@ import glob
 import pickle
 import pandas as pd
 import numpy as np
-from skimage import io, color, filters
-from skimage.transform import resize, rotate
+from skimage import io
+from skimage.transform import resize
 
 
 class ImagePreprocessor():
@@ -41,13 +41,14 @@ class ImagePreprocessor():
             for file in glob.glob(self.src_dir + '/*'):
                 f_name = file.split('/')[-1].split('.')[0]
                 name = self.dest_dir + '/' + f_name + '.jpg'
-                resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
                 if color:
-                    colour = pd.Series(resized, name=file)
-                    io.imsave(os.path.join(self.dest_dir + '/color', name), colour)
+                    resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
+                    # colour = pd.Series(resized, name=file)
+                    io.imsave(name, resized)
                 if not color:
+                    resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
                     gray = pd.Series(color.rgb2gray(resized), name=file)
-                    io.imsave(os.path.join(self.dest_dir + '/gray', name), gray)
+                    io.imsave(os.path.join(self.dest_dir, name), gray)
 
         else: 
             image_set = np.ndarray()
@@ -81,13 +82,13 @@ class ImagePreprocessor():
 
 
 if __name__ == '__main__':
-    src_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/raw/images'
-    dest_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/processed/images'
-    pickle_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/processed/'
+    src_dir = 'data/raw/images'
+    dest_dir = 'data/processed/images'
+    pickle_dir = 'data/processed/'
 
     image_pre = ImagePreprocessor(src_dir, dest_dir)
     
-    image_set = image_pre.resize_save(save=False, color=False)
+    image_set = image_pre.resize_save(save=False, color=True)
 
     file_list = image_pre.get_file_list()
 

@@ -4,7 +4,7 @@ import glob
 from skimage import io, color
 from skimage.filters import sobel
 from skimage.feature import canny
-from pycocotools.coco import COCO
+# from pycocotools.coco import COCO
 
 
 class AnnotationsParser():
@@ -73,13 +73,13 @@ class DatasetBuilder():
 
         for file in glob.glob(path):
             fname = 'images/' + file.split('/')[-1]
-            img = io.imread(file)
-            gray = img.ravel()
+            img = io.imread(file)           
 
-            # additional image filtering
-            # edges = sobel(img)
+            gray = color.rgb2gray(img)
+            # img_hsv = color.rgb2hsv(img)
+            edges = sobel(gray)
 
-            image_dict['data'].append(img.ravel())
+            image_dict['data'].append(sobel.ravel())
             image_dict['filename'].append(fname)
 
         X_ = np.asarray(image_dict['data'])
@@ -151,16 +151,14 @@ class DatasetBuilder():
         Makes our y classification targets
         '''
         X, fX = self._make_dataset()
-        y, fy = self._make_classes()
+        # y, fy = self._make_classes()
 
-        return X, y
+        return X
 
 
 if __name__ == '__main__':
-    src_dir = '/home/chris/Dropbox/galvanize/capstones/lemon-defect-detection/data/raw/annotations'
+    src_dir = 'data/raw/annotations'
     fname = 'instances_default.json'
 
-    # parser = AnnotationsParser(src_dir, fname)
-
     lemons = DatasetBuilder(src_dir, fname)
-    X, y = lemons.load_data()
+    X = lemons.load_data()
