@@ -89,9 +89,9 @@ class DatasetBuilder():
             fname = 'images/' + file.split('/')[-1]
             img = io.imread(file)
 
-            # gray = color.rgb2gray(img)
+            gray = color.rgb2gray(img)
             # img_hsv = color.rgb2hsv(img)
-            edges = sobel(img)
+            edges = sobel(gray)
 
             image_dict['data'].append(edges.ravel())
             image_dict['filename'].append(fname)

@@ -2,6 +2,7 @@ from img_proc import ImagePreprocessor
 from dataset_prep import DatasetBuilder
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, recall_score,\
                             precision_score, accuracy_score,\
                             f1_score, multilabel_confusion_matrix
