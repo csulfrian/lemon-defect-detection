@@ -36,6 +36,10 @@ def get_scores(y_true, y_pred, average='micro'):
 
     return recall, precision, accuracy, f1, jaccard, specificity, miss, conf, report
 
+def save_model(model):
+    with open('models/sobel_lr.txt', 'wb') as fh:
+            pickle.dump(model, fh)
+
 
 if __name__ == '__main__':
     src_dir = 'data/raw/images'
@@ -49,42 +53,37 @@ if __name__ == '__main__':
     lemons = DatasetBuilder(ann_dir, fname)
     X, y = lemons.load_data()
 
-    # print('\nDoing PCA...')
-    # pca = PCA(n_components=0.9)
-    # X_pca = pca.fit_transform(X)
-    # print(f'Number of components covering 90% variance: {pca.n_components_}')
-    # # print(f'Variance components: {np.pca.explained_variance_[0:6])}')
+    X_train, X_test, y_train, y_test = train_test_split(X, y)#, test_size=0.25)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    l1s = [0.01, 0.1, 0.5, 0.9, 0.99]
+    regr = LogisticRegressionCV(class_weight='balanced',
+                               max_iter=1000,
+                               tol=0.001,
+                               n_jobs=-1,
+                               penalty='elasticnet',
+                               l1_ratios=l1s,
+                               multi_class='multinomial',
+                               solver='saga',
+                               verbose=1)
+    print('Fitting CV model\n')
+    model = regr.fit(X_train, y_train)
+    save_model(model)
 
-    # l1s = [0.01, 0.1, 0.5, 0.9, 0.99]
-    # regr = LogisticRegressionCV(class_weight='balanced',
-    #                            max_iter=1000,
-    #                            tol=0.001,
-    #                            n_jobs=-1,
-    #                            penalty='elasticnet',
-    #                            l1_ratios=l1s,
-    #                            multi_class='multinomial',
-    #                            solver='saga',
-    #                            verbose=1)
-    # print('Fitting CV model\n')
+    # regr = LogisticRegression(class_weight='balanced',
+    #                           max_iter=1000,
+    #                           penalty='l2',
+    #                           tol=0.0005,
+    #                           solver='saga',
+    #                           multi_class='multinomial',
+    #                           n_jobs=-1,
+    #                           verbose=1)
+
+    # print('\nFitting model...\n')
     # regr.fit(X_train, y_train)
-
-    regr = LogisticRegression(class_weight='balanced',
-                              max_iter=1000,
-                              penalty='l2',
-                              tol=0.0005,
-                              solver='saga',
-                              multi_class='multinomial',
-                              n_jobs=-1,
-                              verbose=1)
-
-    print('\nFitting model...\n')
-    regr.fit(X_train, y_train)
 
     print('\nPredicting!')
 
-    y_pred = regr.predict(X_test)
+    y_pred = model.predict(X_test)
 
     print(f'\nPredicted classes: \n{y_pred}')
 
@@ -99,3 +98,4 @@ if __name__ == '__main__':
     print(f'Specificity (True Negative rate): {specificity}')
     print(f'Misses (False Negative rate): {miss}')
     print(f'Confusion matrix: \n{conf}')
+    print(report)
