@@ -83,10 +83,7 @@ The .JSON formatted annotations file contains multiple entries (on average 12) p
 I didn't use the segmentation in this project, but each of those colored areas represents an entry in the annotations file which had to be compared to the criteria decided upon above and assigned a quality class. A significant portion of my time this week was spent writing the code to parse through the whole annotations file, making groups of annotations per image, then determining which category each lemon fell into.
 
 # The Technology
-- COCO image annotation API
-- Scikit Image
-- Scikit Learn
-- Amazon EC2 instance
+<img src="images/tech/stack.png" style="width:800px"/>
 
 # The Process
 
@@ -103,7 +100,7 @@ The images were scaled down to 128x128 pixels and saved with Scikit Image. I the
 
 *What actually gets sent through the model* 
 
-I ran PCA on the images after preprocessing, and it had some effect on final model performance. I fit a LogisticRegressionCV model on each of the image transformations on the AWS EC2 instance to run determine the best hyperparameters for the predict phase. I used ElasticNet regularization with a varying L1 ratio in each run. I also used the `class_weight` attribute of the LogisticRegressionCV model to adjust for the severely unbalanced classes.
+I ran PCA on the images after preprocessing, and it only had a negative effect on performance, so I didn't use it in the final runs. I fit a LogisticRegressionCV model on each of the image transformations on the AWS EC2 instance to run determine the best hyperparameters for the predict phase. I used ElasticNet regularization with a varying L1 ratio in each run. I also used the `class_weight` attribute of the LogisticRegressionCV model to adjust for the severely unbalanced classes.
 
 # The Results
 
