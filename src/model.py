@@ -5,7 +5,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, recall_score,\
                             precision_score, accuracy_score,\
-                            f1_score, multilabel_confusion_matrix
+                            f1_score, multilabel_confusion_matrix,\
+                            classification_report
 from sklearn.linear_model import LogisticRegressionCV, LogisticRegression
 import sys
 sys.path.append('./src')
@@ -19,6 +20,10 @@ def get_scores(y_true, y_pred, average='micro'):
     accuracy = accuracy_score(y_true, y_pred)
     f1 = f1_score(y_true, y_pred, average=average)
     jaccard = jaccard_score(y_true, y_pred, average=average)
+    target_names = ['Inedible', 'Commercial', 'Retail']
+    report = classification_report(y_test, y_pred,
+                                   target_names=target_names,
+                                   digits=2)
 
     conf = multilabel_confusion_matrix(y_true, y_pred)
 
@@ -29,7 +34,7 @@ def get_scores(y_true, y_pred, average='micro'):
     specificity = tp / (tp + fn)
     miss = fn / (fn + tp)
 
-    return recall, precision, accuracy, f1, jaccard, specificity, miss, conf
+    return recall, precision, accuracy, f1, jaccard, specificity, miss, conf, report
 
 
 if __name__ == '__main__':
@@ -44,13 +49,13 @@ if __name__ == '__main__':
     lemons = DatasetBuilder(ann_dir, fname)
     X, y = lemons.load_data()
 
-    print('\nDoing PCA...')
-    pca = PCA(n_components=0.9)
-    X_pca = pca.fit_transform(X)
-    print(f'Number of components covering 90% variance: {pca.n_components_}')
-    # print(f'Variance components: {np.pca.explained_variance_[0:6])}')
+    # print('\nDoing PCA...')
+    # pca = PCA(n_components=0.9)
+    # X_pca = pca.fit_transform(X)
+    # print(f'Number of components covering 90% variance: {pca.n_components_}')
+    # # print(f'Variance components: {np.pca.explained_variance_[0:6])}')
 
-    X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.25)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
     # l1s = [0.01, 0.1, 0.5, 0.9, 0.99]
     # regr = LogisticRegressionCV(class_weight='balanced',
@@ -84,7 +89,7 @@ if __name__ == '__main__':
     print(f'\nPredicted classes: \n{y_pred}')
 
     avg_type = 'weighted'
-    recall, precision, accuracy, f1, jaccard, specificity, miss, conf = get_scores(y_test, y_pred, avg_type)
+    recall, precision, accuracy, f1, jaccard, specificity, miss, conf, report = get_scores(y_test, y_pred, avg_type)
 
     print(f'Recall: {recall:0.2f}')
     print(f'Precision: {precision:0.2f}')

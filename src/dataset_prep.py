@@ -90,7 +90,6 @@ class DatasetBuilder():
             img = io.imread(file)
 
             gray = color.rgb2gray(img)
-            # img_hsv = color.rgb2hsv(img)
             edges = sobel(gray)
 
             image_dict['data'].append(edges.ravel())

@@ -48,4 +48,3 @@ if __name__ == '__main__':
     chart_color = 'm'
 
     plots = MakePlots()
-    plots.pca_var_plot(pca)
