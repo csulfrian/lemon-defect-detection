@@ -954,6 +954,19 @@ Confusion matrix:
  [[626  27]
   [  9  11]]]
 
+Classification Report
+
+                precision    recall  f1-score   support
+
+    Inedible       0.68      0.76      0.72        71
+  Commercial       0.94      0.91      0.93       568
+      Retail       0.35      0.41      0.38        34
+
+    accuracy                           0.87       673
+   macro avg       0.66      0.70      0.67       673
+weighted avg       0.88      0.87      0.88       673
+
+
 
 ==========================================================================
 

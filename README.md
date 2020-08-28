@@ -17,7 +17,9 @@ As of 8/21/2020 wholesale pricing is widely varying, from [$12-$40 per 38lbs](ht
 
 Each lemon weighs roughly 1/4 pound and represents a potential gross profit of $0.06. Miscategorizing a non-edible lemon has a negative effect in every circumstance, though quantifying that is difficult. Mis-categorizing an industrial lemon to sell at retail represents a potential loss of a sale.
 
-The goal then is to maximize the amount of lemons we can send to retail outlets as well as minimize the quantity of lemons being mis-categorized as inedible, both of which will maximize profit. 
+The goal then is to maximize the amount of lemons we can send to retail outlets as well as minimize the quantity of lemons being mis-categorized as inedible, both of which will maximize profit.
+
+<img src="images/profit_matrix.png" style="width: 600px"/>
 
 # The Data
 
@@ -106,13 +108,23 @@ I ran PCA on the images after preprocessing, and it had some effect on final mod
 
 # The Results
 
-The model that ended up working the best was a L2 regularized Logistic Regression, using images that had been preprocessed with grayscaling and Sobel edge finding. Using a weighted average for the scores:
+The model that ended up working the best was a L2 regularized Logistic Regression, using images that had been preprocessed with grayscaling and Sobel edge finding.
 
-| Metric | Inedible (0) | Commercial (1) | Retail (2) | Average |
-| ------ | ------------ | ---------------| ---------- | ------- |
-| Jaccard | 56%         | 86%            | 23%        | 83%     |
-| Specificity (True Neg) | 73% | 92%     | 55%        |         |
-| Misses (False Neg) | 27% | 8%          | 45%        |         |
+*__The three class confusion matrix__*
+<img src="images/conf.png" style="width:900px;"/>
+
+The performance report
+
+|              |  Precision  |  Recall | F1 score |  # per class |
+| ------------ | ----------- | ------- | -------- | -------- |
+|    Inedible  |     0.68    |  0.76   |   0.72   |    71    |
+|  Commercial  |     0.94    |  0.91   |   0.93   |    568   |
+|      Retail  |     0.35    |  0.41   |   0.38   |    34    |
+|                                                            |
+|    Accuracy  |             |         |   0.87   |    673   |
+|   Macro avg  |     0.66    |  0.70   |   0.67   |    673   |
+|Weighted avg  |     0.88    |  0.87   |   0.88   |    673   |
+
 
 Another import aspect of this choice of preprocessing was how much faster the Sobel images' model fit (22min vs 86min and 127min).
 
