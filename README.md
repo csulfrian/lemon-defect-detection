@@ -3,7 +3,7 @@
 ## Lemon Defect Detection
 ### A Capstone Data Science Project
 ### by Chris Sulfrian
-<img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
+<img src="images/linkedin_button.png" href="http://linkedin.com/in/csulfrian" alt="Chris Sulfrian LinkedIn"/>
 
 <img src="images/banner.jpg" style="width:900"/>
 
