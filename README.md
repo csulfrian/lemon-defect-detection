@@ -4,7 +4,7 @@
 ### A Capstone Data Science Project
 ### by Chris Sulfrian
 
-<a href="http://linkedin.com/in/csulfrian">
+<a href="http://linkedin.com/in/csulfrian" target="_blank">
  <img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
 </a>
 
