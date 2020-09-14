@@ -51,7 +51,7 @@ class ImagePreprocessor():
             image_set = []
 
             for file in glob.glob(self.src_dir + '/*'):
-                resized = resize(io.imread(file), (128, 128), anti_aliasing=True)
+                resized = resize(io.imread(file), (299, 299), anti_aliasing=True)
                 image_set.append(np.asarray(resized))
 
             pass
