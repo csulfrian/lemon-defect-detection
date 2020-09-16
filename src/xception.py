@@ -10,6 +10,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import Xception
 from tensorflow.keras.models import load_model
 
+tf.get_logger().setLevel('ERROR')
 
 def make_generators(direc, image_size, batch_size, split_size=0.2):
     '''
@@ -37,6 +38,7 @@ def make_generators(direc, image_size, batch_size, split_size=0.2):
     train_datagen = ImageDataGenerator(
             rescale=1./255,
             shear_range=0.2,
+            channel_shift_range=0.2,
             zoom_range=0.2,
             horizontal_flip=True,
             validation_split=split_size
@@ -52,7 +54,8 @@ def make_generators(direc, image_size, batch_size, split_size=0.2):
             target_size=image_size,
             batch_size=batch_size,
             class_mode='categorical',
-            subset='training'
+            subset='training',
+            shuffle=True
             )
 
     validation_generator = test_datagen.flow_from_directory(
@@ -60,29 +63,11 @@ def make_generators(direc, image_size, batch_size, split_size=0.2):
             target_size=image_size,
             batch_size=batch_size,
             class_mode='categorical',
-            subset='validation'
+            subset='validation',
+            shuffle=True
             )
 
     return train_generator, validation_generator
-
-def plot_metrics(history):
-    metrics =  ['loss', 'auc', 'precision', 'recall']
-    for n, metric in enumerate(metrics):
-        name = metric.replace("_"," ").capitalize()
-        plt.subplot(2,2,n+1)
-        plt.plot(history.epoch,  history.history[metric], color=colors[0], label='Train')
-        plt.plot(history.epoch, history.history['val_'+metric],
-                color=colors[0], linestyle="--", label='Val')
-        plt.xlabel('Epoch')
-        plt.ylabel(name)
-        if metric == 'loss':
-                plt.ylim([0, plt.ylim()[1]])
-        elif metric == 'auc':
-                plt.ylim([0.8,1])
-        else:
-                plt.ylim([0,1])
-
-        plt.legend()
 
 def parallelize(hardware='GPU'):
     '''
@@ -124,7 +109,7 @@ if __name__ == '__main__':
       try:
         tf.config.experimental.set_virtual_device_configuration(
             gpus[0],
-            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024*6)])
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=12288)])
         logical_gpus = tf.config.experimental.list_logical_devices('GPU')
         print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
       except RuntimeError as e:
@@ -135,7 +120,7 @@ if __name__ == '__main__':
     image_size = (299, 299)
     batch_size = 32
 
-    # strategy = parallelize()
+    strategy = parallelize()
 
     X_train, X_test = make_generators(direc, image_size, batch_size)
 
@@ -154,37 +139,41 @@ if __name__ == '__main__':
             embeddings_freq=0
             ),
         keras.callbacks.EarlyStopping(
-            monitor='val_loss',
-            min_delta=0.002,
-            patience=1,
-            verbose=2,
-            mode='auto',
+            monitor='CategoricalAccuracy',
+            min_delta=0.0005,
+            patience=4,
+            verbose=1,
+            mode='max',
             baseline=None,
             restore_best_weights=True
             )
-
         ]
 
-    # with strategy.scope():
-    model = tf.keras.applications.Xception(
-    include_top=True,
-        weights=None,
-        input_tensor=None,
-        input_shape=None,
-        pooling=None,
-        classes=3
+    with strategy.scope():
+        base_model = tf.keras.applications.Xception(
+            include_top=False,
+            weights='imagenet',
+            input_tensor=None,
+            input_shape=None,
+            pooling=None,
+            classes=3
         )
+        
+        base_model.trainable = False
 
-    model.compile(
-    optimizer=keras.optimizers.Adam(
-    learning_rate=0.001,
-        epsilon=0.1),
-        loss="categorical_crossentropy",
-        metrics=["CategoricalAccuracy", "Recall"]
-    )
+        inputs = keras.Input(shape=(299, 299, 3))
+        x = base_model(inputs, training=False)
+        x = keras.layers.Dense(units=3, activation='softmax')(x)
+        outputs = keras.layers.Dense(1)(x)
+        model = keras.Model(inputs, outputs)
 
-        # experimental_steps_per_execution = 50,
-        # keras.utils.plot_model(model, show_shapes=True)
+        model.compile(
+            optimizer=keras.optimizers.Adam(
+            learning_rate=0.001,
+            epsilon=0.1),
+            loss="categorical_crossentropy",
+            metrics=["CategoricalAccuracy", "Recall"]
+        )
 
     class_weights = {
                 0: 1,
@@ -197,14 +186,14 @@ if __name__ == '__main__':
         validation_data=X_test,
         callbacks=callbacks,
         steps_per_epoch=None,
-        epochs=20,
+        epochs=50,
         class_weight=class_weights,
-        verbose=2
+        verbose=1
 	)
 
     model_file = 'models/xception.hd5'
 
-    model.save(model_file)
-    del model
+    model.save(filepath=model_file, include_optimizer=True)
+    # del model
 
-    model = load_model(model_file)
+    # model = load_model(model_file)
