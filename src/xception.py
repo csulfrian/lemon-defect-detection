@@ -163,8 +163,8 @@ if __name__ == '__main__':
 
         inputs = keras.Input(shape=(299, 299, 3))
         x = base_model(inputs, training=False)
-        x = keras.layers.Dense(units=3, activation='softmax')(x)
-        outputs = keras.layers.Dense(1)(x)
+        x = keras.layers.GlobalAveragePooling2D()(x)
+        outputs = keras.layers.Dense(units=3, activation='softmax')(x)
         model = keras.Model(inputs, outputs)
 
         model.compile(
