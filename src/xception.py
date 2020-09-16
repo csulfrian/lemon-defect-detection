@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -12,7 +11,7 @@ from tensorflow.keras.models import load_model
 
 tf.get_logger().setLevel('ERROR')
 
-def make_generators(direc, image_size, batch_size, split_size=0.2):
+def make_generators(direc, image_size, batch_size=32, split_size=0.2):
     '''
     Makes the train & validataion datasets.
 
@@ -102,6 +101,60 @@ def parallelize(hardware='GPU'):
         return strategy
 
 
+def make_model(transfer=False, parallel=False):
+    strategy = parallelize()
+
+    if transfer:
+        with strategy.scope():
+            base_model = tf.keras.applications.Xception(
+                include_top=False,
+                weights='imagenet',
+                input_tensor=None,
+                input_shape=None,
+                pooling=None,
+                classes=3
+            )
+            
+            base_model.trainable = False
+
+            inputs = keras.Input(shape=(299, 299, 3))
+            x = base_model(inputs, training=False)
+            x = keras.layers.GlobalAveragePooling2D()(x)
+            outputs = keras.layers.Dense(units=3, activation='softmax')(x)
+            model = keras.Model(inputs, outputs)
+
+            model.compile(
+                optimizer=keras.optimizers.Adam(
+                learning_rate=0.001,
+                epsilon=0.1),
+                loss="categorical_crossentropy",
+                metrics=["categorical_accuracy", "Recall"]
+            )
+        return model
+
+    elif not transfer:
+        with strategy.scope():
+            model = tf.keras.applications.Xception(
+                include_top=True,
+                weights=None,
+                input_tensor=None,
+                input_shape=None,
+                pooling=None,
+                classes=3
+            )
+
+            model.trainable = True
+
+            model.compile(
+                optimizer=keras.optimizers.Adam(
+                learning_rate=0.001,
+                epsilon=0.1),
+                loss="categorical_crossentropy",
+                metrics=["categorical_accuracy", "Recall", "AUC"]
+            )
+        return model
+
+
 if __name__ == '__main__':
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
@@ -120,16 +173,43 @@ if __name__ == '__main__':
     image_size = (299, 299)
     batch_size = 32
 
-    strategy = parallelize()
-
     X_train, X_test = make_generators(direc, image_size, batch_size)
+
+    # strategy = parallelize()
+    # with strategy.scope():
+    base_model = tf.keras.applications.Xception(
+        include_top=False,
+        weights='imagenet',
+        input_tensor=None,
+        input_shape=None,
+        pooling=None,
+        classes=3
+    )
+    
+    base_model.trainable = False
+
+    inputs = keras.Input(shape=(299, 299, 3))
+    x = base_model(inputs, training=False)
+    x = keras.layers.GlobalAveragePooling2D()(x)
+    outputs = keras.layers.Dense(units=3, activation='softmax')(x)
+    model = keras.Model(inputs, outputs)
+
+    model.summary()
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(
+        learning_rate=0.001,
+        epsilon=0.1),
+        loss="categorical_crossentropy",
+        metrics=["categorical_accuracy", "Recall"]
+    )
 
     checkpoint_filename = 'models/save_at_{epoch}.h5'
     callbacks = [
         keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_filename,
-            monitor='categorical_crossentropy',
-            mode='auto',
+            monitor='categorical_accuracy',
+            mode='max',
             save_best_only=True
             ),
         keras.callbacks.TensorBoard(
@@ -139,9 +219,9 @@ if __name__ == '__main__':
             embeddings_freq=0
             ),
         keras.callbacks.EarlyStopping(
-            monitor='CategoricalAccuracy',
-            min_delta=0.0005,
-            patience=4,
+            monitor='categorical_accuracy',
+            min_delta=0.003,
+            patience=3,
             verbose=1,
             mode='max',
             baseline=None,
@@ -149,36 +229,10 @@ if __name__ == '__main__':
             )
         ]
 
-    with strategy.scope():
-        base_model = tf.keras.applications.Xception(
-            include_top=False,
-            weights='imagenet',
-            input_tensor=None,
-            input_shape=None,
-            pooling=None,
-            classes=3
-        )
-        
-        base_model.trainable = False
-
-        inputs = keras.Input(shape=(299, 299, 3))
-        x = base_model(inputs, training=False)
-        x = keras.layers.GlobalAveragePooling2D()(x)
-        outputs = keras.layers.Dense(units=3, activation='softmax')(x)
-        model = keras.Model(inputs, outputs)
-
-        model.compile(
-            optimizer=keras.optimizers.Adam(
-            learning_rate=0.001,
-            epsilon=0.1),
-            loss="categorical_crossentropy",
-            metrics=["CategoricalAccuracy", "Recall"]
-        )
-
     class_weights = {
-                0: 1,
+                0: 1.03,
                 1: 4.4,
-                2: 1.03
+                2: 1
                 }
 
     model.fit(
@@ -186,7 +240,7 @@ if __name__ == '__main__':
         validation_data=X_test,
         callbacks=callbacks,
         steps_per_epoch=None,
-        epochs=50,
+        epochs=70,
         class_weight=class_weights,
         verbose=1
 	)
@@ -197,3 +251,33 @@ if __name__ == '__main__':
     # del model
 
     # model = load_model(model_file)
+
+
+    # Unfreeze the base model
+    base_model.trainable = True
+
+    model.summary()
+
+
+    # It's important to recompile your model after you make any changes
+    # to the `trainable` attribute of any inner layer, so that your changes
+    # are taken into account
+    model.compile(
+        optimizer=keras.optimizers.Adam(
+        learning_rate=1e-5,
+        loss="categorical_crossentropy",
+        metrics=["categorical_accuracy", "Recall"])
+    )
+
+    # Train end-to-end. Be careful to stop before you overfit!
+    model.fit(
+        X_train,
+        validation_data=X_test,
+        callbacks=callbacks,
+        steps_per_epoch=None,
+        epochs=10,
+        class_weight=class_weights,
+        verbose=1
+	)
+
+    model.save(filepath='models/xception_post_transfer.hd5', include_optimizer=True)
