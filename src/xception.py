@@ -220,7 +220,6 @@ if __name__ == '__main__':
             ),
         keras.callbacks.EarlyStopping(
             monitor='categorical_accuracy',
-            min_delta=0.003,
             patience=3,
             verbose=1,
             mode='max',
