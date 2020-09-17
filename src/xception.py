@@ -1,5 +1,8 @@
 import numpy as np
 import os
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -36,9 +39,9 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
     '''
     train_datagen = ImageDataGenerator(
             rescale=1./255,
-            shear_range=0.2,
-            channel_shift_range=0.2,
-            zoom_range=0.2,
+            shear_range=0.4,
+            channel_shift_range=0.4,
+            zoom_range=0.4,
             horizontal_flip=True,
             validation_split=split_size
             )
@@ -82,9 +85,6 @@ def parallelize(hardware='GPU'):
     strategy: strategy object
             The mirroring strategy for the .compile method to build with.
     '''
-    # config = tf.ConfigProto()
-    # config.gpu_options.allow_growth = True
-
     if hardware == 'TPU':
         resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='grpc://' + os.environ['COLAB_TPU_ADDR'])
         tf.config.experimental_connect_to_cluster(resolver)
@@ -120,7 +120,10 @@ def make_model(transfer=False, parallel=False):
             inputs = keras.Input(shape=(299, 299, 3))
             x = base_model(inputs, training=False)
             x = keras.layers.GlobalAveragePooling2D()(x)
-            outputs = keras.layers.Dense(units=3, activation='softmax')(x)
+            outputs = keras.layers.Dense(
+                    units=3,
+                    activation='softmax',
+                    kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
             model = keras.Model(inputs, outputs)
 
             model.compile(
@@ -128,7 +131,7 @@ def make_model(transfer=False, parallel=False):
                 learning_rate=0.001,
                 epsilon=0.1),
                 loss="categorical_crossentropy",
-                metrics=["categorical_accuracy", "Recall"]
+                metrics=["categorical_accuracy", "Recall", "AUC"]
             )
         return model
 
@@ -158,11 +161,11 @@ def make_model(transfer=False, parallel=False):
 if __name__ == '__main__':
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
-      # Restrict TensorFlow to only allocate 1GB of memory on the first GPU
+      # Restrict TensorFlow to only allocate 12GB of memory on the first GPU
       try:
         tf.config.experimental.set_virtual_device_configuration(
             gpus[0],
-            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=12288)])
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=15288)])
         logical_gpus = tf.config.experimental.list_logical_devices('GPU')
         print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
       except RuntimeError as e:
@@ -175,57 +178,60 @@ if __name__ == '__main__':
 
     X_train, X_test = make_generators(direc, image_size, batch_size)
 
-    # strategy = parallelize()
-    # with strategy.scope():
-    base_model = tf.keras.applications.Xception(
-        include_top=False,
-        weights='imagenet',
-        input_tensor=None,
-        input_shape=None,
-        pooling=None,
-        classes=3
-    )
-    
-    base_model.trainable = False
+    # model = make_model(transfer=True)
+    strategy = parallelize()
+    with strategy.scope():
+        base_model = tf.keras.applications.Xception(
+            include_top=False,
+            weights='imagenet',
+            input_tensor=None,
+            input_shape=None,
+            pooling=None,
+            classes=3
+        )
+        
+        base_model.trainable = False
 
-    inputs = keras.Input(shape=(299, 299, 3))
-    x = base_model(inputs, training=False)
-    x = keras.layers.GlobalAveragePooling2D()(x)
-    outputs = keras.layers.Dense(units=3, activation='softmax')(x)
-    model = keras.Model(inputs, outputs)
+        inputs = keras.Input(shape=(299, 299, 3))
+        x = base_model(inputs, training=False)
+        x = keras.layers.GlobalAveragePooling2D()(x)
+        x = keras.layers.Dropout(0.2)(x)
+        outputs = keras.layers.Dense(units=3, activation='softmax', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
+        model = keras.Model(inputs, outputs)
 
-    model.summary()
+        # model.summary()
 
-    model.compile(
-        optimizer=keras.optimizers.Adam(
-        learning_rate=0.001,
-        epsilon=0.1),
-        loss="categorical_crossentropy",
-        metrics=["categorical_accuracy", "Recall"]
-    )
+        model.compile(
+            optimizer=keras.optimizers.Adam(
+            learning_rate=0.001,
+            epsilon=0.1),
+            loss='CategoricalCrossentropy',
+            metrics=["categorical_accuracy", "Recall"]
+        )
 
     checkpoint_filename = 'models/save_at_{epoch}.h5'
     callbacks = [
         keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_filename,
-            monitor='categorical_accuracy',
+            monitor='val_loss',
             mode='max',
             save_best_only=True
             ),
         keras.callbacks.TensorBoard(
             log_dir='models',
-            histogram_freq=0,
+            histogram_freq=1,
             write_graph=True,
-            embeddings_freq=0
-            ),
-        keras.callbacks.EarlyStopping(
-            monitor='categorical_accuracy',
-            patience=3,
-            verbose=1,
-            mode='max',
-            baseline=None,
-            restore_best_weights=True
-            )
+            embeddings_freq=0)
+        #     ),
+        # keras.callbacks.EarlyStopping(
+        #     monitor='val_loss',
+        #     min_delta=0.003,
+        #     patience=3,
+        #     verbose=1,
+        #     mode='max',
+        #     baseline=None,
+        #     restore_best_weights=True
+        #     )
         ]
 
     class_weights = {
@@ -239,8 +245,8 @@ if __name__ == '__main__':
         validation_data=X_test,
         callbacks=callbacks,
         steps_per_epoch=None,
-        epochs=70,
         class_weight=class_weights,
+        epochs=35,
         verbose=1
 	)
 
@@ -255,18 +261,18 @@ if __name__ == '__main__':
     # Unfreeze the base model
     base_model.trainable = True
 
-    model.summary()
+    # model.summary()
 
 
     # It's important to recompile your model after you make any changes
     # to the `trainable` attribute of any inner layer, so that your changes
     # are taken into account
-    model.compile(
-        optimizer=keras.optimizers.Adam(
-        learning_rate=1e-5,
-        loss="categorical_crossentropy",
-        metrics=["categorical_accuracy", "Recall"])
-    )
+    with strategy.scope():
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=1e-5),
+            loss='CategoricalCrossentropy',
+            metrics=["categorical_accuracy", "Recall", "AUC"]
+        )
 
     # Train end-to-end. Be careful to stop before you overfit!
     model.fit(
@@ -274,8 +280,8 @@ if __name__ == '__main__':
         validation_data=X_test,
         callbacks=callbacks,
         steps_per_epoch=None,
-        epochs=10,
         class_weight=class_weights,
+        epochs=5,
         verbose=1
 	)
 

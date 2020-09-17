@@ -1,6 +1,9 @@
 # model pickle
 /models
 
+# Archive files
+*.tar.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
