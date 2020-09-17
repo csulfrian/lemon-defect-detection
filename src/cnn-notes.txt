@@ -1,0 +1,45 @@
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_2 (InputLayer)         [(None, 299, 299, 3)]     0         
+_________________________________________________________________
+xception (Functional)        (None, None, None, 2048)  20861480  
+_________________________________________________________________
+global_average_pooling2d (Gl (None, 2048)              0         
+_________________________________________________________________
+dense (Dense)                (None, 3)                 6147      
+=================================================================
+Total params: 20,867,627
+Trainable params: 6,147
+Non-trainable params: 20,861,480
+_________________________________________________________________
+
+
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_2 (InputLayer)         [(None, 299, 299, 3)]     0         
+_________________________________________________________________
+xception (Functional)        (None, None, None, 2048)  20861480  
+_________________________________________________________________
+global_average_pooling2d (Gl (None, 2048)              0         
+_________________________________________________________________
+dense (Dense)                (None, 3)                 6147      
+=================================================================
+Total params: 20,867,627
+Trainable params: 20,813,099
+Non-trainable params: 54,528
+_________________________________________________________________
+
+instance 1
+ssh -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-24-200.us-east-2.compute.amazonaws.com
+
+scp -i ~/.ssh/kp-dsi.pem src/xception.py ubuntu@ec2-3-16-24-200.us-east-2.compute.amazonaws.com:~/lemon-drop-defect-detection/src
+scp -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-24-200.us-east-2.compute.amazonaws.com:~/lemon-drop-defect-detection/models /home/chris/Desktop
+
+
+instance2
+ssh -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com
+
+scp -i ~/.ssh/kp-dsi.pem src/xception.py ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com:~/object-defect-detection-using-lemons/src
+scp -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com:~/object-defect-detection-using-lemons/models /home/chris/Desktop

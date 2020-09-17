@@ -9,4 +9,4 @@
 - Choose your chosen metrics
 
 
-- Party Time!
+- Run `model.py` from the home folder of the project.
