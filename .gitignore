@@ -8,6 +8,7 @@ cnn-notes.txt
 models/*.*
 *.h5
 *.pb
+models.zip
 
 # Archive files
 *.tar.gz

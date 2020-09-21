@@ -139,8 +139,9 @@ def make_model(transfer=False):
 
             model.compile(
                 optimizer=keras.optimizers.Adam(
-                learning_rate=0.001,
-                epsilon=0.1),
+                    learning_rate=0.001,
+                    epsilon=0.1
+                ),
                 loss='categorical_crossentropy',
                 metrics=["categorical_accuracy", "Recall", "AUC"]
             )
@@ -161,8 +162,9 @@ def make_model(transfer=False):
 
             model.compile(
                 optimizer=keras.optimizers.Adam(
-                learning_rate=0.001,
-                epsilon=0.1),
+                    learning_rate=0.001,
+                    epsilon=0.1
+                ),
                 loss="categorical_crossentropy",
                 metrics=["categorical_accuracy", "Recall", "AUC"]
             )
