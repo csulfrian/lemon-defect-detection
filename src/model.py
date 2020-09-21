@@ -36,7 +36,7 @@ def get_scores(y_true, y_pred, average='micro'):
     specificity = tp / (tp + fn)
     miss = fn / (fn + tp)
 
-    return recall, precision, accuracy, f1, jaccard, specificity, miss, conf, report
+    return report
 
 def save_model(model, filename):
     name = os.path.join('models/', filename)
@@ -97,14 +97,6 @@ if __name__ == '__main__':
     print(f'\nPredicted classes: \n{y_pred}')
 
     avg_type = 'weighted'
-    recall, precision, accuracy, f1, jaccard, specificity, miss, conf, report = get_scores(y_test, y_pred, avg_type)
+    report = get_scores(y_test, y_pred, avg_type)
 
-    print(f'Recall: {recall:0.2f}')
-    print(f'Precision: {precision:0.2f}')
-    print(f'Accuracy: {accuracy:0.2f}')
-    print(f'F1 score: {f1:0.2f}')
-    print(f'Jaccard Score: {jaccard}')
-    print(f'Specificity (True Negative rate): {specificity}')
-    print(f'Misses (False Negative rate): {miss}')
-    print(f'Confusion matrix: \n{conf}')
     print(report)

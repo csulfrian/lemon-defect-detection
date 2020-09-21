@@ -43,3 +43,24 @@ ssh -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com
 
 scp -i ~/.ssh/kp-dsi.pem src/xception.py ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com:~/object-defect-detection-using-lemons/src
 scp -i ~/.ssh/kp-dsi.pem ubuntu@ec2-3-16-26-0.us-east-2.compute.amazonaws.com:~/object-defect-detection-using-lemons/models /home/chris/Desktop
+
+
+              precision    recall  f1-score   support
+
+           0       0.51      0.45      0.47       238
+           1       0.15      0.22      0.18        54
+           2       0.49      0.50      0.50       245
+
+    accuracy                           0.45       537
+   macro avg       0.38      0.39      0.38       537
+weighted avg       0.46      0.45      0.46       537
+
+
+[[0.19739292 0.05586592 0.18994413]
+ [0.03165736 0.02234637 0.04655493]
+ [0.16014898 0.06703911 0.22905028]]
+
+C[[106  30 102]
+I [ 17  12  25]
+R [ 86  36 123]]
+    C   I   R

@@ -1,5 +1,11 @@
+# specific files
+image_prep.py
+predict-for-nano.py
+/notebooks/
+cnn-notes.txt
+
 # model pickle
-/models
+/models/
 
 # Archive files
 *.tar.gz
