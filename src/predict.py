@@ -72,9 +72,6 @@ def predict_batch(model, batch):
 
     categories = np.argmax(y_pred, axis=-1)
 
-    # for i in zip(batch.classes, categories):
-    #     print()
-
     report = classification_report(batch.classes, categories)
     print(report)
 

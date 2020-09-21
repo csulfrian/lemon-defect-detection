@@ -5,10 +5,13 @@ predict-for-nano.py
 cnn-notes.txt
 
 # model pickle
-/models/
+models/*.*
+*.h5
+*.pb
 
 # Archive files
 *.tar.gz
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

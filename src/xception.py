@@ -64,7 +64,7 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
             batch_size=batch_size,
             class_mode='categorical',
             subset='validation',
-            shuffle=True
+            shuffle=False
             )
 
     return train_generator, validation_generator
