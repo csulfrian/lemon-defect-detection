@@ -88,15 +88,13 @@ if __name__ == '__main__':
     tf.get_logger().setLevel('ERROR')
     print(f'Using Keras version {keras.__version__}')
     
-    # print('Loading model...')
-    # model = keras.models.load_model('models/xception_transfer_seeded', compile=True)
+    print('Loading model...')
+    model = keras.models.load_model('models/xception_transfer_seeded', compile=True)
 
-    direc = 'data/raw/classified'
+    directory = 'data/raw/classified'
     image_size = (299, 299)
     batch_size = 32
 
-    _, X_test = make_generators(direc, image_size, batch_size)
+    _, X_test = make_generators(directory, image_size, batch_size)
 
-    # predict_batch(model, X_test)
-    for i in X_test:
-        print(i)
+    predict_batch(model, X_test)
