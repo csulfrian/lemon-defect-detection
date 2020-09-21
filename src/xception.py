@@ -1,8 +1,5 @@
 import numpy as np
 import os
-# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-# os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -12,7 +9,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import Xception
 from tensorflow.keras.models import load_model
 
-tf.get_logger().setLevel('ERROR')
 
 def make_generators(direc, image_size, batch_size=32, split_size=0.2):
     '''
@@ -53,6 +49,7 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
 
     train_generator = train_datagen.flow_from_directory(
             directory=direc,
+            seed=42,
             target_size=image_size,
             batch_size=batch_size,
             class_mode='categorical',
@@ -62,6 +59,7 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
 
     validation_generator = test_datagen.flow_from_directory(
             directory=direc,
+            seed=42,
             target_size=image_size,
             batch_size=batch_size,
             class_mode='categorical',
@@ -159,22 +157,26 @@ def make_model(transfer=False, parallel=False):
 
 
 if __name__ == '__main__':
+    tf.get_logger().setLevel('ERROR')
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
-      # Restrict TensorFlow to only allocate 12GB of memory on the first GPU
-      try:
-        tf.config.experimental.set_virtual_device_configuration(
-            gpus[0],
-            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=15288)])
-        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-      except RuntimeError as e:
-        # Virtual devices must be set before GPUs have been initialized
-        print(e)
+        try:
+            tf.config.experimental.set_memory_growth(gpus[0], True)
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+        except RuntimeError as e:
+            # Virtual devices must be set before GPUs have been initialized
+            print(e)
 
     direc = 'data/raw/classified'
     image_size = (299, 299)
     batch_size = 32
+
+    class_weights = {
+            0: 1.03,
+            1: 4.4,
+            2: 1
+            }
 
     X_train, X_test = make_generators(direc, image_size, batch_size)
 
@@ -195,18 +197,18 @@ if __name__ == '__main__':
         inputs = keras.Input(shape=(299, 299, 3))
         x = base_model(inputs, training=False)
         x = keras.layers.GlobalAveragePooling2D()(x)
-        x = keras.layers.Dropout(0.2)(x)
-        outputs = keras.layers.Dense(units=3, activation='softmax', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
+        
+        outputs = keras.layers.Dense(units=3,
+                                     activation='softmax',
+                                     kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
         model = keras.Model(inputs, outputs)
-
-        # model.summary()
 
         model.compile(
             optimizer=keras.optimizers.Adam(
             learning_rate=0.001,
             epsilon=0.1),
-            loss='CategoricalCrossentropy',
-            metrics=["categorical_accuracy", "Recall"]
+            loss='categorical_crossentropy',
+            metrics=["categorical_accuracy", "Recall", "AUC"]
         )
 
     checkpoint_filename = 'models/save_at_{epoch}.h5'
@@ -219,26 +221,11 @@ if __name__ == '__main__':
             ),
         keras.callbacks.TensorBoard(
             log_dir='models',
-            histogram_freq=1,
+            histogram_freq=0,
             write_graph=True,
-            embeddings_freq=0)
-        #     ),
-        # keras.callbacks.EarlyStopping(
-        #     monitor='val_loss',
-        #     min_delta=0.003,
-        #     patience=3,
-        #     verbose=1,
-        #     mode='max',
-        #     baseline=None,
-        #     restore_best_weights=True
-        #     )
+            embeddings_freq=0
+            )
         ]
-
-    class_weights = {
-                0: 1.03,
-                1: 4.4,
-                2: 1
-                }
 
     model.fit(
         X_train,
@@ -246,43 +233,43 @@ if __name__ == '__main__':
         callbacks=callbacks,
         steps_per_epoch=None,
         class_weight=class_weights,
-        epochs=35,
+        epochs=10,
         verbose=1
 	)
 
-    model_file = 'models/xception.hd5'
-
-    model.save(filepath=model_file, include_optimizer=True)
-    # del model
-
-    # model = load_model(model_file)
-
-
-    # Unfreeze the base model
     base_model.trainable = True
 
-    # model.summary()
-
-
-    # It's important to recompile your model after you make any changes
-    # to the `trainable` attribute of any inner layer, so that your changes
-    # are taken into account
     with strategy.scope():
         model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=1e-5),
-            loss='CategoricalCrossentropy',
+            loss='categorical_crossentropy',
             metrics=["categorical_accuracy", "Recall", "AUC"]
         )
 
-    # Train end-to-end. Be careful to stop before you overfit!
     model.fit(
         X_train,
         validation_data=X_test,
         callbacks=callbacks,
         steps_per_epoch=None,
         class_weight=class_weights,
-        epochs=5,
+        epochs=3,
         verbose=1
 	)
 
-    model.save(filepath='models/xception_post_transfer.hd5', include_optimizer=True)
+    model.save(filepath='models/xception_transfer_seeded', include_optimizer=True)
+
+    # del model
+
+    # model1 = keras.models.load_model('models/bad', compile=True)
+
+    # img = tf.keras.preprocessing.image.load_img('data/raw/classified/inedible/0002_G_I_45_A.jpg', target_size=image_size)
+    # input_arr = keras.preprocessing.image.img_to_array(img)
+    # input_arr = tf.expand_dims(input_arr, 0)
+    # img=tf.keras.applications.xception.preprocess_input(input_arr)
+    
+    # print('Predicting!')
+    # pred = model.predict(img, verbose=0)
+    # print(pred)
+    # preds = np.argmax(model.predict(input_arr, verbose=0), axis=-1)
+    # score = tf.nn.softmax(pred[0])
+    # print(f'This image most likely belongs to class {preds}, with {np.max(score)} confidence.')
