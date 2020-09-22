@@ -69,7 +69,7 @@ class DatasetBuilder():
         self.dir_ = dir_
         self.filename = filename
 
-    def _make_dataset(self, path='data/processed/images/*'):
+    def _make_dataset(self, path='data/processed/created/*'):
         '''
         Makes the X dataset and corresponding filenames
 

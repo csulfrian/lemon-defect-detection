@@ -73,30 +73,38 @@ if __name__ == '__main__':
     # model = regr.fit(X_train, y_train)
 
     regr = LogisticRegression(class_weight='balanced',
-                              max_iter=100,
+                              max_iter=500,
                               penalty='l2',
-                              tol=0.05,
+                              tol=0.008,
                               solver='saga',
                               multi_class='multinomial',
                               n_jobs=-1,
                               verbose=1)
-'''
-    print('\nFitting model...\n')
-    m = regr.fit(X_train, y_train)
-    print(m)
+
+    # print('\nFitting model...\n')
+    # m = regr.fit(X_train, y_train)
+    # print(m)
     model_filename = 'log_regression_model.joblib'
-    print('\nSaving model...')
-    save_model(m, model_filename)
+    # print('\nSaving model...')
+    # save_model(m, model_filename)
 
     model = joblib.load(os.path.join('models/', model_filename))
-'''
+
+    from skimage import io, color
+    from skimage.filters import sobel
+    img = io.imread('data/processed/created/DSCN3580.jpg')
+
+    gray = color.rgb2gray(img)
+    edges = sobel(gray)
+    test = edges.ravel()
+
     print('\nPredicting!')
 
-    y_pred = model.predict(X_test)
+    y_pred = model.predict_proba(test.reshape(1, -1))
 
     print(f'\nPredicted classes: \n{y_pred}')
 
-    avg_type = 'weighted'
-    report = get_scores(y_test, y_pred, avg_type)
+    # avg_type = 'weighted'
+    # report = get_scores(y_test, y_pred, avg_type)
 
-    print(report)
+    # print(report)

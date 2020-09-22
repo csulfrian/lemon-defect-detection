@@ -78,12 +78,12 @@ class ImagePreprocessor():
 
 
 if __name__ == '__main__':
-    src_dir = 'data/raw/images'
-    dest_dir = 'data/processed/images'
+    src_dir = 'data/created'
+    dest_dir = 'data/processed/created'
 
     image_pre = ImagePreprocessor(src_dir, dest_dir)
     
-    image_set = image_pre.resize_save(save=False, color=True)
+    image_set = image_pre.resize_save(save=True, color=True)
 
     file_list = image_pre.get_file_list()
 
