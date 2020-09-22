@@ -12,6 +12,7 @@ models.zip
 
 # Archive files
 *.tar.gz
+*.tar.xz
 *.zip
 
 # Byte-compiled / optimized / DLL files
