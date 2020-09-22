@@ -80,7 +80,7 @@ if __name__ == '__main__':
                               multi_class='multinomial',
                               n_jobs=-1,
                               verbose=1)
-
+'''
     print('\nFitting model...\n')
     m = regr.fit(X_train, y_train)
     print(m)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     save_model(m, model_filename)
 
     model = joblib.load(os.path.join('models/', model_filename))
-
+'''
     print('\nPredicting!')
 
     y_pred = model.predict(X_test)
