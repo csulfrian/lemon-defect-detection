@@ -34,6 +34,7 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
 
     '''
     train_datagen = ImageDataGenerator(
+            data_format=’channels_first’,
             rescale=1./255,
             shear_range=0.4,
             channel_shift_range=0.4,
@@ -43,6 +44,7 @@ def make_generators(direc, image_size, batch_size=32, split_size=0.2):
             )
     
     test_datagen = ImageDataGenerator(
+            data_format=’channels_first’,
             rescale=1./255,
             validation_split=split_size
             )
@@ -139,7 +141,7 @@ def make_model(transfer=False):
 
             model.compile(
                 optimizer=keras.optimizers.Adam(
-                    learning_rate=0.001,
+                    learning_rate=0.00001,
                     epsilon=0.1
                 ),
                 loss='categorical_crossentropy',
@@ -162,13 +164,21 @@ def make_model(transfer=False):
 
             model.compile(
                 optimizer=keras.optimizers.Adam(
-                    learning_rate=0.001,
+                    learning_rate=0.00001,
                     epsilon=0.1
                 ),
                 loss="categorical_crossentropy",
                 metrics=["categorical_accuracy", "Recall", "AUC"]
             )
         return model
+
+    def save(model, filename):
+        output_names = model.output.op.name
+        sess = tf.keras.backend.get_session()
+        frozen_graph = tf.graph_util.convert_variables_to_constants(sess, sess.graph.as_graph_def(), [output_names])
+        frozen_graph = tf.graph_util.remove_training_nodes(frozen_graph)
+        with open(filename, “wb”) as ofile:
+        ofile.write(frozen_graph.SerializeToString())
 
 
 if __name__ == '__main__':
@@ -211,7 +221,37 @@ if __name__ == '__main__':
             )
         ]
 
-    model = make_model(transfer=True)
+    # model = make_model(transfer=True)
+    with strategy.scope():
+        base_model = tf.keras.applications.Xception(
+            include_top=False,
+            weights='imagenet',
+            input_tensor=None,
+            input_shape=None,
+            pooling=None,
+            classes=3
+        )
+        
+        base_model.trainable = False
+
+        inputs = keras.Input(shape=(299, 299, 3))
+        x = base_model(inputs, training=False)
+        x = keras.layers.GlobalAveragePooling2D()(x)
+        
+        outputs = keras.layers.Dense(units=3,
+                                    activation='softmax',
+                                    kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
+        model = keras.Model(inputs, outputs)
+
+        model.compile(
+            optimizer=keras.optimizers.Adam(
+                learning_rate=0.0001,
+                epsilon=0.1
+            ),
+            loss='categorical_crossentropy',
+            metrics=["categorical_accuracy", "Recall", "AUC"]
+        )
+
     model.trainable = False
 
     model.fit(
@@ -220,7 +260,7 @@ if __name__ == '__main__':
         callbacks=callbacks,
         steps_per_epoch=None,
         class_weight=class_weights,
-        epochs=10,
+        epochs=1,
         verbose=1
 	)
 
@@ -238,23 +278,25 @@ if __name__ == '__main__':
         callbacks=callbacks,
         steps_per_epoch=None,
         class_weight=class_weights,
-        epochs=3,
+        epochs=1,
         verbose=1
 	)
 
-    model.save(filepath='models/xception_transfer_seeded', include_optimizer=True)
+    save(model, 'models/xception_channels_first.pb')
+
+    # model.save(filepath='models/xception_transfer', include_optimizer=True)
     del model
 
-    model1 = keras.models.load_model('models/bad', compile=True)
+    # model1 = keras.models.load_model('models/bad', compile=True)
 
-    img = tf.keras.preprocessing.image.load_img('data/raw/classified/inedible/0002_G_I_45_A.jpg', target_size=image_size)
-    input_arr = keras.preprocessing.image.img_to_array(img)
-    input_arr = tf.expand_dims(input_arr, 0)
-    img=tf.keras.applications.xception.preprocess_input(input_arr)
+    # img = tf.keras.preprocessing.image.load_img('data/raw/classified/inedible/0002_G_I_45_A.jpg', target_size=image_size)
+    # input_arr = keras.preprocessing.image.img_to_array(img)
+    # input_arr = tf.expand_dims(input_arr, 0)
+    # img=tf.keras.applications.xception.preprocess_input(input_arr)
     
-    print('Predicting!')
-    pred = model.predict(img, verbose=0)
-    print(pred)
-    preds = np.argmax(model.predict(input_arr, verbose=0), axis=-1)
-    score = tf.nn.softmax(pred[0])
-    print(f'This image most likely belongs to class {preds}, with {np.max(score)} confidence.')
+    # print('Predicting!')
+    # pred = model.predict(img, verbose=0)
+    # print(pred)
+    # preds = np.argmax(model.predict(input_arr, verbose=0), axis=-1)
+    # score = tf.nn.softmax(pred[0])
+    # print(f'This image most likely belongs to class {preds}, with {np.max(score)} confidence.')

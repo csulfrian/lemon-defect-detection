@@ -4,11 +4,12 @@ predict-for-nano.py
 /notebooks/
 cnn-notes.txt
 
-# model pickle
-models/*.*
+# model files
+models/
 *.h5
 *.pb
 models.zip
+variables.*
 
 # Archive files
 *.tar.gz
