@@ -16,8 +16,8 @@ variables.*
 *.tar.xz
 *.zip
 
-# Archive files
-*.tar.gz
+# logs
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
