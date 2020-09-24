@@ -4,14 +4,32 @@ from tensorflow.python.framework.convert_to_constants import convert_variables_t
 import numpy as np 
 
 
-def freeze_and_save(model, filepath, verbose=False):
-    #path of the directory where you want to save your model
+def save_frozen_model(model, filename, verbose=False):
+    '''
+    Saves a stripped down, frozen version of the model file
+
+    Parameters
+    ----------
+    model: Keras model
+        The trained model to freeze and save
+    
+    filename: string
+        The filename to save as
+    
+    verbose: boolean
+        If True prints out each layer of the graph. Default = False
+
+    Output
+    ------
+    filename.pb: Keras frozen model
+        The frozen serialized model file
+    filename.pbtxt: json-like text file
+        The same mode, human-readable
+    '''
     frozen_out_path = 'models/frozen'
+    output_filename = filename
 
-    # name of the .pb file
-    frozen_graph_filename = 'frozen_graph'
-
-    model = keras.models.load_model('models', compile=False)
+    model = model
 
     # Convert Keras model to ConcreteFunction
     full_model = tf.function(lambda x: model(x))
@@ -29,6 +47,7 @@ def freeze_and_save(model, filepath, verbose=False):
         for layer in layers:
             print(layer)
 
+    # Take note of these! Especially the outputs
     print("-" * 60)
     print("Frozen model inputs: ")
     print(frozen_func.inputs)
@@ -38,17 +57,24 @@ def freeze_and_save(model, filepath, verbose=False):
     # Save frozen graph to disk
     tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
                     logdir=frozen_out_path,
-                    name=f"{frozen_graph_filename}.pb",
+                    name=f"{output_filename}.pb",
                     as_text=False)
                     
     # Save its text representation
     tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
                     logdir=frozen_out_path,
-                    name=f"{frozen_graph_filename}.pbtxt",
+                    name=f"{output_filename}.pbtxt",
                     as_text=True)
 
 '''
-def optimize():
-    python -m tensorflow.python.tools.optimize_for_inference --input ./model_20K_96_soft_f1/frozen_model/frozen_graph.pb
-    --output ./model_20K_96_soft_f1/optimized/optmized_graph.pb --frozen_graph=True --input_names=x --output_names=Identity
+# TODO
+# Graph optimizer into function
+python -m tensorflow.python.tools.optimize_for_inference --input path/to/frozen_graph.pb
+--output path/to/optmized_graph.pb --frozen_graph=True --input_names=x --output_names=Identity
+'''
+
+'''
+# TODO
+# UFF converter to function
+/usr/lib/python3.6/dist-packages/uff/bin$ python convert_to_uff.py path/to/optimized_graph.pb
 '''

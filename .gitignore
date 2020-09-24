@@ -1,6 +1,8 @@
 # specific files
 image_prep.py
 predict-for-nano.py
+builder.py
+frozen-graph-gen.py
 /notebooks/
 cnn-notes.txt
 

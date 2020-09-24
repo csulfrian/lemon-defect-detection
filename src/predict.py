@@ -1,5 +1,7 @@
 import numpy as np
 import os
+import glob
+from skimage import io
 # import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
@@ -16,14 +18,16 @@ from xception import make_generators
 
 def predict_one(model, path):
     '''
-    Predict one image's classification. Prints the probabilities and the class prediction.
+    Predict one image's classification. Prints the probabilities
+    and the class prediction.
 
     Parameters
     ----------
     model: Keras model
         Feed in the loaded model file you want to predict on.
     path: string
-        The path of the single image to predict on. No pre-processing necessary.
+        The path of the single image to predict on.
+        No pre-processing necessary
 
     Outputs
     -------
@@ -32,11 +36,14 @@ def predict_one(model, path):
     '''
     image_size = (299, 299)
 
-    img = tf.keras.preprocessing.image.load_img(path, target_size=image_size)
+    img = tf.keras.preprocessing.image.load_img(
+        path,
+        target_size=image_size
+    )
     input_arr = keras.preprocessing.image.img_to_array(img)
     input_arr = tf.expand_dims(input_arr, 0)
-    img=tf.keras.applications.xception.preprocess_input(input_arr)
-    
+    img = tf.keras.applications.xception.preprocess_input(input_arr)
+
     print('Predicting!\n')
     pred = model.predict(img, verbose=0)
 
@@ -45,53 +52,66 @@ def predict_one(model, path):
     score = tf.nn.softmax(pred[0])
     best = np.max(score)
 
-    print(f'Image most likely belongs to class \
+    print(f'Image {path} most likely belongs to class \
           {category[0]}, with {(best * 100):0.0f}% confidence.\n')
 
     return category
 
-def predict_batch(model, batch):
+
+def predict_batch(model, directory='data/raw/classified', print_metrics=False):
     '''
-    Predict one image's classification. Prints the probabilities and the class prediction.
+    Predict one image's classification. Prints the probabilities
+    and the class prediction
 
     Parameters
     ----------
     model: Keras model
-        Feed in the loaded model file you want to predict on.
-    path: Keras dataset generator
-        The generator of images and labels to predict on.
+        Feed in the loaded model file you want to predict on
+    directory: string
+        The path of the directory containing the images to predict on
 
     Outputs
     -------
     category: array
         The predicted categories of the images
     '''
+    directory = directory
+    image_size = (299, 299)
+    batch_size = 32
+
+    X_test = make_generators(
+        directory,
+        image_size,
+        batch_size,
+    )
+
     print('Predicting!')
-    y_pred = model.predict(batch, verbose=1)
+    y_pred = model.predict(X_test, verbose=1)
     probabilities = np.around(y_pred, 2)
 
     categories = np.argmax(y_pred, axis=-1)
+    if print_metrics:
+        report = classification_report(X_test.classes, categories)
+        print(report)
 
-    report = classification_report(batch.classes, categories)
-    print(report)
+        conf = confusion_matrix(X_test.classes, categories)
+        print(conf)
 
-    conf = confusion_matrix(batch.classes, categories)
-    print(conf)
-
+    for i in zip(X_test.classes, categories):
+        print(i)
     return categories
 
 
 if __name__ == '__main__':
     tf.get_logger().setLevel('ERROR')
-    print(f'Using Keras version {keras.__version__}')
-    
+
     print('Loading model...')
-    model = keras.models.load_model('models/xception_transfer_seeded', compile=True)
+    model = keras.models.load_model(
+        'models/xception_post_transfer.hd5',
+        compile=True
+    )
 
-    directory = 'data/raw/classified'
-    image_size = (299, 299)
-    batch_size = 32
-
-    _, X_test = make_generators(directory, image_size, batch_size)
-
-    predict_batch(model, X_test)
+    for file in glob.glob('data/created/*'):
+        img = io.imread(file)
+        predict_one(model, img)
+        # print(file)

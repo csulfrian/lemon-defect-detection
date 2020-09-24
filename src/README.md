@@ -1,4 +1,4 @@
-# To run this project
+### To run the Logistic Ression part of this project:
 
 - Open `model.py`
 - Replace the existing paths with the paths to the raw images & COCO-formatted annotations file on your machine.
