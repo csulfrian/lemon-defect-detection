@@ -1,13 +1,16 @@
-# Stop! Don't Let That Lemon Pass!
-## - or -
-## Lemon Defect Detection
-### A Capstone Data Science Project
-### by Chris Sulfrian
+# Lemon Drop - Defect Detection for Process Control
+### A Capstone Data Science Project by Chris Sulfrian
 
 <a href="http://linkedin.com/in/csulfrian" target="_blank">
  <img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
 </a>
+<details>
+  <summary>Click to expand!</summary>
+ 
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe> 
 
+ # Part 1: Logistic Regression
+ 
 <img src="images/banner.jpg" style="width:900"/>
 
 # The Problem
@@ -161,3 +164,5 @@ I look forward to working on this project more!
 
 # References
 Dataset: https://github.com/softwaremill/lemon-dataset
+
+</details>
