@@ -1,12 +1,12 @@
 # Lemon Drop - Defect Detection for Process Control
-### A Capstone Data Science Project by Chris Sulfrian
+### by Chris Sulfrian
 
 <a href="http://linkedin.com/in/csulfrian" target="_blank">
  <img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
 </a>
-<br/>
+<br>
 
-<a href="(https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000"> Link to the presentation slides </a>
+<a href="(https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000" target="_blank"> Link to the presentation slides </a>
 
 <details>
   <summary>Click to Expand Part 1</summary>
