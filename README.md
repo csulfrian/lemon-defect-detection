@@ -4,7 +4,7 @@
 <a href="http://linkedin.com/in/csulfrian" target="_blank">
  <img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
 </a>
-
+<br>
 [Link to the presentation slides](https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000)
 
 <details>
