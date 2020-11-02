@@ -5,10 +5,10 @@
  <img src="images/linkedin_button.png" alt="Chris Sulfrian LinkedIn"/>
 </a>
 
-<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+[Link to the presentation slides](https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000)
 
 <details>
-  <summary>Click to expand!</summary>
+  <summary>Click to Expand Part 1</summary>
 
  # Part 1: Logistic Regression
  
