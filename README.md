@@ -11,7 +11,7 @@
 <br>
 <br>
 <details>
-  <summary>Click to Expand Part 1</summary>
+  <summary>Click to Expand Part 1 - Logistic Regression</summary>
 
  # Part 1: Logistic Regression
  
