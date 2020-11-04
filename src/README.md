@@ -1,3 +1,14 @@
+### To run the Convolutional Neural Network - Xception model
+
+- Pre-classify your images, placing each class into its own named folder
+- Open `xception.py`
+- Scroll to the `if __name__ == '__main__':` block
+- Set the variable `direc` to the path containing your classified images.
+- Save and close the file
+
+
+- Run `python src/xception.py` from the home folder of the project. 
+
 ### To run the Logistic Ression part of this project:
 
 - Open `model.py`
@@ -9,4 +20,4 @@
 - Choose your chosen metrics
 
 
-- Run `model.py` from the home folder of the project.
+- Run `python src/model.py` from the home folder of the project.
