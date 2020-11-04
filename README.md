@@ -6,7 +6,7 @@
 </a>
 <br>
 
-<a href="(https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000" target="_blank"> Link to the presentation slides </a>
+<a href="https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000" target="_blank">Link to the presentation slides</a>
 
 <details>
   <summary>Click to Expand Part 1</summary>
