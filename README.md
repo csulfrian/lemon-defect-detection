@@ -6,9 +6,10 @@
 </a>
 <br>
 <br>
-<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">_</iframe>
+<a href="https://docs.google.com/presentation/d/e/2PACX-1vRRmnENqJE0O9kdFSe7ARbETqaktOXGQK0ssFLO_P1x73wKfxu4DVm_2NqvIehk6O2kTthCMhtyBfHq/pub?start=false&loop=false&delayms=3000" target="_blank">Link to the presentation slides</a>
 
-
+<br>
+<br>
 <details>
   <summary>Click to Expand Part 1</summary>
 
